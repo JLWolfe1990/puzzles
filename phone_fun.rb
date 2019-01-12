@@ -28,12 +28,7 @@ def format_phone_string(string, string_length)
 
     i += 1
 
-    if early_dash && (i == string_length - 2)
-      # jump to the end and break
-
-      formatted_string << '-'
-      skip_dash = true
-    end
+    formatted_string << '-' && skip_dash = true if early_dash && (i == string_length - 2)
 
     formatted_string << '-' if i % 3 == 0 && !skip_dash
   end
