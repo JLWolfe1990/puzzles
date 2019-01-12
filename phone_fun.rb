@@ -9,14 +9,15 @@ def phone_format(s)
   # one digit by itself as specified by the API
   return string unless string_length > 2
 
-  format_phone(string, string_length)
+  format_phone_string(string, string_length)
 end
 
 private
 
-def format_phone(string, string_length)
+def format_phone_string(string, string_length)
   formatted_string = ""
   early_dash = string_length % 3 == 1
+  skip_dash = false
 
   # start index at 1 for easier comprehension
   i = 0
@@ -31,12 +32,10 @@ def format_phone(string, string_length)
       # jump to the end and break
 
       formatted_string << '-'
-      formatted_string << string[-2..-1].to_s
-
-      break
+      skip_dash = true
     end
 
-    formatted_string << '-' if i % 3 == 0
+    formatted_string << '-' if i % 3 == 0 && !skip_dash
   end
 
   formatted_string
