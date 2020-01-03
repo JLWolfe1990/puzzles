@@ -10,10 +10,7 @@ def assert(exp1, exp2)
 end
 
 def convert_to_military(time_str)
-  # todo
-  if(time_str.match?(/12:[0123456789]{1,2} AM/))
-    return "00:#{time_str[3..4]}"
-  end
+  return "00:#{time_str[3..4]}" if(time_str.match?(/12:[0123456789]{1,2} AM/))
 
   if(time_str.match?(/PM/))
     hours = time_str[0..1].to_i
@@ -26,31 +23,22 @@ def convert_to_military(time_str)
 end
 
 def add_minutes_to_military(mil_time_str, shift_time)
-  if(shift_time < 0)
-    shift_time = MINS_PER_DAY + shift_time
-  end
+  shift_time = MINS_PER_DAY + shift_time if(shift_time < 0)
 
-  hours_str, mins_str = mil_time_str.split(":")
+  hours, mins = mil_time_str.split(":").map(&:to_i)
 
-  add_hours = (shift_time / 60).to_i
-  add_mins = shift_time % 60
+  add_hours_from_shift = (shift_time / 60).to_i
+  add_mins_from_shift = shift_time % 60
 
-  hours = hours_str.to_i + add_hours
-  mins = mins_str.to_i
+  sum_mins = add_mins_from_shift + mins
 
-  sum_mins = add_mins + mins
+  hours = (hours + add_hours_from_shift + (sum_mins / 60).to_i)
 
-  hours = hours + (sum_mins / 60).to_i
-  hours = hours % 24
-  mins = sum_mins % 60
-
-  ("%02d" % hours) + ":" + ("%02d" % mins)
+  ("%02d" % (hours % 24)) + ":" + ("%02d" % (sum_mins % 60))
 end
 
 def print_twelve_hr_format(mil_time_str)
-  hours_str, mins_str = mil_time_str.split(":")
-  hours = hours_str.to_i
-  mins = mins_str.to_i
+  hours, mins = mil_time_str.split(":").map(&:to_i)
   am_pm = "AM"
 
   am_pm = "PM" if hours >= 12
@@ -62,12 +50,12 @@ def print_twelve_hr_format(mil_time_str)
 end
 
 def do_time_adjustment(time_str, shift_time)
-  raise "invalid format" unless time_str.match?(/[012]{0,1}:[0123456789]{1,2} [AM|PM]/)
+  raise "invalid format" unless time_str.match?(/[012]{0,1}:[0123456789]{1,2} [AM|PM]/) || !shift_time.is_a?(Integer)
 
   mil_time_str = convert_to_military(time_str)
-  mil_time_str = add_minutes_to_military(mil_time_str, shift_time)
+  adjusted_mil_time_str = add_minutes_to_military(mil_time_str, shift_time)
 
-  print_twelve_hr_format(mil_time_str)
+  print_twelve_hr_format(adjusted_mil_time_str)
 end
 
 assert(convert_to_military("12:00 AM"), "00:00")
@@ -90,3 +78,4 @@ assert(print_twelve_hr_format("23:59"), "11:59 PM")
 assert(do_time_adjustment("12:00 AM", 120), "02:00 AM")
 assert(do_time_adjustment("12:00 AM", 12 * 60), "12:00 PM")
 assert(do_time_adjustment("11:59 PM", 6), "12:05 AM")
+assert(do_time_adjustment("12:00 AM", 96 * 60 + 5), "12:05 AM")
